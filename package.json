@@ -1,0 +1,24 @@
+{
+  "name": "foodhunt",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "FoodHunt: PWA kurasi kuliner lokal Tembalang dan manajemen Hunt List.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "axios": "^1.21.0",
+    "lucide-react": "^1.62.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

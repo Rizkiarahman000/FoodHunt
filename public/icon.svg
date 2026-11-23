@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="FoodHunt">
+  <defs>
+    <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fb923c" />
+      <stop offset="1" stop-color="#ea580c" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#warm)" />
+  <path d="M256 86c-59 0-107 48-107 107 0 78 107 233 107 233s107-155 107-233c0-59-48-107-107-107Z" fill="#fffaf3" />
+  <circle cx="256" cy="193" r="45" fill="#9a3412" />
+</svg>
