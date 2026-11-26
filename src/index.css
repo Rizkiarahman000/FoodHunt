@@ -3298,6 +3298,15 @@ a {
   color: var(--brand-strong);
 }
 
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+body:has(dialog[open]) .bottom-nav,
+body:has(dialog[open]) .update-banner {
+  visibility: hidden;
+}
+
 .side-review-scores {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3350,8 +3359,8 @@ a {
 }
 
 .modal-close {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   flex: none;
 }
 

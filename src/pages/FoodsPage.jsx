@@ -149,7 +149,12 @@ export default function FoodsPage() {
         <label className="select-wrap">
           <SlidersHorizontal size={15} aria-hidden="true" />
           <span className="sr-only">Urutkan hasil</span>
-          <select value={sort} onChange={(event) => setSort(event.target.value)}>
+          <select
+            id="foods-sort"
+            name="sort"
+            value={sort}
+            onChange={(event) => setSort(event.target.value)}
+          >
             {SORT_OPTIONS.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}

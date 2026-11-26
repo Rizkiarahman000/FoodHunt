@@ -1,30 +1,20 @@
 import axios from 'axios'
 
 // ---------------------------------------------------------------------------
-// api.js : klien Supabase PostgREST.
+// api.js: klien API Express milik sendiri.
 //
-// Isi lewat environment variable (lokal: .env, produksi: Vercel):
-//   VITE_API_BASE_URL=https://<project-ref>.supabase.co
-//   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+// Development: VITE_API_BASE_URL kosong, Vite mem-proxy /api ke localhost:3000.
+// Production: isi VITE_API_BASE_URL dengan URL API Vercel, mis.
+//   https://foodhunt-api.vercel.app/api
+//
+// Tidak ada kredensial Supabase di sisi frontend.
 // ---------------------------------------------------------------------------
 
-export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '')
-
-export const SUPABASE_KEY =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_SUPABASE_ANON_KEY ||
-  ''
-
-export const IS_CONFIGURED = Boolean(API_BASE_URL && SUPABASE_KEY)
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '')
 
 export const apiClient = axios.create({
-  baseURL: IS_CONFIGURED ? `${API_BASE_URL}/rest/v1` : '/rest/v1',
-  headers: {
-    'Content-Type': 'application/json',
-    ...(SUPABASE_KEY
-      ? { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
-      : {}),
-  },
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
   timeout: 12000,
 })
 

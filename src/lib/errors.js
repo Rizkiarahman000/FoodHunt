@@ -1,26 +1,36 @@
-import { IS_CONFIGURED, isNetworkError } from '../config/api'
+import { isNetworkError } from '../config/api'
 
-export function configMessage() {
-  return 'Supabase belum dihubungkan. Isi VITE_API_BASE_URL dan VITE_SUPABASE_PUBLISHABLE_KEY di file .env.'
+function apiMessage(error) {
+  return (
+    error?.response?.data?.error ||
+    error?.response?.data?.message ||
+    error?.message ||
+    ''
+  )
 }
 
 export function dataErrorMessage(error) {
-  if (!IS_CONFIGURED) return configMessage()
-  if (isNetworkError(error)) return 'Tidak bisa menghubungi server. Periksa koneksi, lalu coba lagi.'
-  if (error?.response?.status === 401 || error?.response?.status === 403) {
-    return 'Akses database ditolak. Cek policy RLS di Supabase.'
+  if (isNetworkError(error)) {
+    return 'Tidak bisa menghubungi API FoodHunt. Pastikan backend Express berjalan dan VITE_API_BASE_URL benar.'
   }
-  return 'Server menolak permintaan. Cek koneksi dan policy database.'
+  if (error?.response?.status === 404) {
+    return 'Data tidak ditemukan di server.'
+  }
+  if (error?.response?.status >= 500) {
+    return 'API FoodHunt sedang bermasalah. Coba lagi beberapa saat.'
+  }
+  return apiMessage(error) || 'Data gagal dimuat dari API.'
 }
 
 export function mutationMessage(error, fallback = 'Perubahan gagal disimpan. Coba lagi.') {
-  if (!IS_CONFIGURED) return configMessage()
   const code = error?.response?.data?.code
   if (code === '23505') return 'Resto ini sudah punya catatan review.'
   if (code === '23503') return 'Resto yang dipilih sudah tidak ada.'
-  if (isNetworkError(error)) return 'Koneksi terputus. Perubahan belum tersimpan.'
-  if (error?.response?.status === 401 || error?.response?.status === 403) {
-    return 'Akses database ditolak. Cek policy RLS di Supabase.'
+  if (isNetworkError(error)) {
+    return 'Tidak bisa menghubungi API. Perubahan belum tersimpan.'
   }
-  return fallback
+  if (error?.response?.status === 401 || error?.response?.status === 403) {
+    return 'Akses ditolak oleh API.'
+  }
+  return apiMessage(error) || fallback
 }

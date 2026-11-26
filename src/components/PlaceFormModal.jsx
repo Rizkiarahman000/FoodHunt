@@ -93,6 +93,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Nama resto</span>
             <input
               type="text"
+              name="name"
               value={form.name}
               onChange={updateField('name')}
               placeholder="mis. Warung Makan Bu Tini"
@@ -105,6 +106,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Kawasan</span>
             <input
               type="text"
+              name="area_name"
               value={form.areaName}
               onChange={updateField('areaName')}
               placeholder="mis. Jl. Gondang"
@@ -120,7 +122,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
 
           <label className="form-field">
             <span>Kategori</span>
-            <select value={form.category} onChange={updateField('category')}>
+            <select name="category" value={form.category} onChange={updateField('category')}>
               {CATEGORIES.filter((category) => category !== 'Semua').map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -133,6 +135,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Kisaran harga</span>
             <input
               type="text"
+              name="price_range"
               value={form.priceRange}
               onChange={updateField('priceRange')}
               placeholder="Rp10.000 - Rp20.000"
@@ -144,6 +147,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Harga termurah (angka)</span>
             <input
               type="number"
+              name="min_price"
               min="0"
               step="500"
               value={form.minPrice}
@@ -156,6 +160,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Jam buka</span>
             <input
               type="text"
+              name="open_hours"
               value={form.openHours}
               onChange={updateField('openHours')}
               placeholder="10.00 - 22.00 WIB"
@@ -166,6 +171,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>Patokan alamat</span>
             <input
               type="text"
+              name="landmark"
               value={form.landmark}
               onChange={updateField('landmark')}
               placeholder="mis. seberang bengkel Jl. Gondang"
@@ -176,6 +182,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
             <span>URL foto (opsional)</span>
             <input
               type="url"
+              name="image_url"
               value={form.imageUrl}
               onChange={updateField('imageUrl')}
               placeholder="https://..."
@@ -185,6 +192,7 @@ export default function PlaceFormModal({ open, initialPlace, onClose, onSaved })
           <label className="form-field form-field--full">
             <span>Catatan</span>
             <textarea
+              name="description"
               rows="3"
               value={form.description}
               onChange={updateField('description')}

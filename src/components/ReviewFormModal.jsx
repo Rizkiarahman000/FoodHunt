@@ -139,6 +139,8 @@ export default function ReviewFormModal({
             <label className="form-field form-field--full">
               <span>Resto yang pernah dibeli</span>
               <select
+                id="review-place"
+                name="place_id"
                 value={form.placeId}
                 onChange={updateField('placeId')}
                 required
@@ -170,6 +172,7 @@ export default function ReviewFormModal({
               <span>Menu yang dibeli</span>
               <input
                 type="text"
+                name="item_name"
                 value={form.itemName}
                 onChange={updateField('itemName')}
                 placeholder="mis. Geprek sambal bawang"
@@ -180,6 +183,7 @@ export default function ReviewFormModal({
               <span>Nominal belanja</span>
               <input
                 type="number"
+                name="amount"
                 min="0"
                 step="500"
                 value={form.amount}
@@ -192,6 +196,7 @@ export default function ReviewFormModal({
               <span>Tanggal beli</span>
               <input
                 type="date"
+                name="purchased_at"
                 value={form.purchasedAt}
                 onChange={updateField('purchasedAt')}
                 max={todayISO()}
@@ -202,6 +207,7 @@ export default function ReviewFormModal({
             <label className="form-field form-field--full">
               <span>Catatan</span>
               <textarea
+                name="note"
                 rows="3"
                 value={form.note}
                 onChange={updateField('note')}

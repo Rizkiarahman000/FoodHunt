@@ -2,8 +2,18 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Development: frontend di 5173, API Express di 3000.
+const apiProxy = {
+  '/api': {
+    target: 'http://localhost:3000',
+    changeOrigin: true,
+  },
+}
+
 // https://vite.dev/config/
 export default defineConfig({
+  server: { proxy: apiProxy },
+  preview: { proxy: apiProxy },
   plugins: [
     react(),
     VitePWA({
@@ -17,7 +27,7 @@ export default defineConfig({
         name: 'FoodHunt: Buruan Kuliner Tembalang',
         short_name: 'FoodHunt',
         description:
-          'Cari tempat makan hemat di sekitar kampus, simpan buruan, dan tandai yang sudah dicoba.',
+          'Rekomendasi kuliner Tembalang, simpan hidden gem, dan catat resto yang pernah dibeli.',
         lang: 'id',
         start_url: '/',
         scope: '/',
@@ -36,12 +46,12 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
         cleanupOutdatedCaches: true,
         navigateFallback: 'index.html',
-        // Jangan pernah mengembalikan app shell untuk request REST.
-        navigateFallbackDenylist: [/^\/rest\/v1\//],
+        // Jangan pernah mengembalikan app shell untuk request API.
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
-            // Data katalog terakhir tetap terbaca saat offline.
-            urlPattern: ({ url }) => url.hostname.endsWith('.supabase.co'),
+            // Data terakhir dari API Express tetap terbaca saat offline.
+            urlPattern: ({ url }) => url.pathname.startsWith('/api/'),
             handler: 'NetworkFirst',
             options: {
               cacheName: 'foodhunt-api',

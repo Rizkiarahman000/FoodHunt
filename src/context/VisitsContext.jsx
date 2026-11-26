@@ -1,8 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import visitService from '../services/visitService'
-import { IS_CONFIGURED } from '../config/api'
 import { readStore, writeStore } from '../lib/storage'
-import { configMessage, dataErrorMessage } from '../lib/errors'
+import { dataErrorMessage } from '../lib/errors'
 import { visitAverage } from '../lib/reviews'
 
 // ---------------------------------------------------------------------------
@@ -31,12 +30,6 @@ export function VisitsProvider({ children }) {
   }, [])
 
   const refresh = useCallback(async () => {
-    if (!IS_CONFIGURED) {
-      setError({ message: configMessage(), kind: 'config' })
-      setLoading(false)
-      return
-    }
-
     try {
       setLoading(visitsRef.current.length === 0)
       const rows = await visitService.list()

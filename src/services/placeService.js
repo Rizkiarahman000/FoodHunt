@@ -3,12 +3,12 @@ import { apiClient } from '../config/api'
 // ---------------------------------------------------------------------------
 // placeService: semua resto (kurasi dan resto pribadi).
 //
-// Endpoint:
-//   GET    /rest/v1/places
-//   GET    /rest/v1/places?id=eq.<id>
-//   POST   /rest/v1/places
-//   PATCH  /rest/v1/places?id=eq.<id>
-//   DELETE /rest/v1/places?id=eq.<id>
+// Frontend memanggil API Express:
+//   GET    /api/places
+//   GET    /api/places/:id
+//   POST   /api/places
+//   PUT    /api/places/:id
+//   DELETE /api/places/:id
 // ---------------------------------------------------------------------------
 
 export function normalizePlace(row) {
@@ -34,69 +34,60 @@ export function normalizePlace(row) {
   }
 }
 
-export function placePayload(data, { create = false } = {}) {
-  const now = new Date().toISOString()
-  const payload = {
-    name: data.name.trim(),
-    area_name: data.areaName.trim(),
+function toPayload(data) {
+  return {
+    name: data.name,
+    area_name: data.areaName,
     category: data.category,
-    price_range: data.priceRange.trim(),
-    min_price: Math.max(0, Number(data.minPrice) || 0),
-    open_hours: (data.openHours || '').trim(),
-    landmark: (data.landmark || '').trim(),
-    description: (data.description || '').trim(),
-    image_url: (data.imageUrl || '').trim(),
+    price_range: data.priceRange,
+    min_price: Number(data.minPrice) || 0,
+    open_hours: data.openHours || '',
+    landmark: data.landmark || '',
+    description: data.description || '',
+    image_url: data.imageUrl || '',
     signature_menus: data.signatureMenus || [],
-    updated_at: now,
   }
-
-  if (create) {
-    payload.id = `place-${crypto.randomUUID()}`
-    payload.rating = 0
-    payload.source = 'personal'
-    payload.created_at = now
-  }
-
-  return payload
 }
 
 class PlaceService {
-  async list() {
-    const { data } = await apiClient.get(
-      '/places?select=*&order=source.asc,rating.desc,name.asc',
-    )
-    return (Array.isArray(data) ? data : []).map(normalizePlace)
+  async list(params = {}) {
+    const { data } = await apiClient.get('/places', { params })
+    if (!Array.isArray(data)) {
+      throw new Error('Respons API tidak valid. Periksa VITE_API_BASE_URL.')
+    }
+    return data.map(normalizePlace)
   }
 
   async getById(id) {
-    const { data } = await apiClient.get(
-      `/places?select=*&id=eq.${encodeURIComponent(id)}&limit=1`,
-    )
-    const row = Array.isArray(data) ? data[0] : null
-    return row ? normalizePlace(row) : null
+    try {
+      const { data } = await apiClient.get(`/places/${encodeURIComponent(id)}`)
+      if (!data || typeof data !== 'object' || !data.id) {
+        throw new Error('Respons detail resto tidak valid.')
+      }
+      return normalizePlace(data)
+    } catch (err) {
+      if (err?.response?.status === 404) return null
+      throw err
+    }
   }
 
   async create(data) {
-    const payload = placePayload(data, { create: true })
-    const { data: rows } = await apiClient.post('/places?select=*', payload, {
-      headers: { Prefer: 'return=representation' },
-    })
-    const row = Array.isArray(rows) ? rows[0] : rows
-    return row ? normalizePlace(row) : { ...data, id: payload.id, source: 'personal' }
+    const { data: row } = await apiClient.post('/places', toPayload(data))
+    if (!row?.id) throw new Error('Resto gagal dibuat oleh API.')
+    return normalizePlace(row)
   }
 
   async update(id, data) {
-    const { data: rows } = await apiClient.patch(
-      `/places?select=*&id=eq.${encodeURIComponent(id)}`,
-      placePayload(data),
-      { headers: { Prefer: 'return=representation' } },
+    const { data: row } = await apiClient.put(
+      `/places/${encodeURIComponent(id)}`,
+      toPayload(data),
     )
-    const row = Array.isArray(rows) ? rows[0] : rows
-    return row ? normalizePlace(row) : null
+    if (!row?.id) throw new Error('Resto gagal diperbarui oleh API.')
+    return normalizePlace(row)
   }
 
   async remove(id) {
-    await apiClient.delete(`/places?id=eq.${encodeURIComponent(id)}`)
+    await apiClient.delete(`/places/${encodeURIComponent(id)}`)
   }
 }
 

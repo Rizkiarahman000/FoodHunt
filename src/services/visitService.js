@@ -1,13 +1,13 @@
 import { apiClient } from '../config/api'
 
 // ---------------------------------------------------------------------------
-// visitService: catatan pernah beli + review satu resto.
+// visitService: catatan pernah beli dan review satu resto.
 //
-// Endpoint:
-//   GET    /rest/v1/visits
-//   POST   /rest/v1/visits
-//   PATCH  /rest/v1/visits?id=eq.<id>
-//   DELETE /rest/v1/visits?id=eq.<id>
+// Frontend memanggil API Express:
+//   GET    /api/visits
+//   POST   /api/visits
+//   PUT    /api/visits/:id
+//   DELETE /api/visits/:id
 // ---------------------------------------------------------------------------
 
 export function normalizeVisit(row) {
@@ -30,44 +30,41 @@ function toPayload(data) {
   return {
     place_id: data.placeId,
     item_name: (data.itemName || '').trim(),
-    amount: data.amount === '' || data.amount == null ? null : Math.max(0, Number(data.amount)),
+    amount: data.amount === '' || data.amount == null ? null : Number(data.amount),
     purchased_at: data.purchasedAt || null,
     taste: Number(data.taste) || 0,
     affordability: Number(data.affordability) || 0,
     environment: Number(data.environment) || 0,
     note: (data.note || '').trim(),
-    updated_at: new Date().toISOString(),
   }
 }
 
 class VisitService {
-  async list() {
-    const { data } = await apiClient.get(
-      '/visits?select=*&order=purchased_at.desc,created_at.desc',
-    )
-    return (Array.isArray(data) ? data : []).map(normalizeVisit)
+  async list(params = {}) {
+    const { data } = await apiClient.get('/visits', { params })
+    if (!Array.isArray(data)) {
+      throw new Error('Respons API tidak valid. Periksa VITE_API_BASE_URL.')
+    }
+    return data.map(normalizeVisit)
   }
 
   async create(data) {
-    const { data: rows } = await apiClient.post('/visits?select=*', toPayload(data), {
-      headers: { Prefer: 'return=representation' },
-    })
-    const row = Array.isArray(rows) ? rows[0] : rows
-    return row ? normalizeVisit(row) : null
+    const { data: row } = await apiClient.post('/visits', toPayload(data))
+    if (!row?.id) throw new Error('Review gagal disimpan oleh API.')
+    return normalizeVisit(row)
   }
 
   async update(id, data) {
-    const { data: rows } = await apiClient.patch(
-      `/visits?select=*&id=eq.${encodeURIComponent(id)}`,
+    const { data: row } = await apiClient.put(
+      `/visits/${encodeURIComponent(id)}`,
       toPayload(data),
-      { headers: { Prefer: 'return=representation' } },
     )
-    const row = Array.isArray(rows) ? rows[0] : rows
-    return row ? normalizeVisit(row) : null
+    if (!row?.id) throw new Error('Review gagal diperbarui oleh API.')
+    return normalizeVisit(row)
   }
 
   async remove(id) {
-    await apiClient.delete(`/visits?id=eq.${encodeURIComponent(id)}`)
+    await apiClient.delete(`/visits/${encodeURIComponent(id)}`)
   }
 }
 

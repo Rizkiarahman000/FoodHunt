@@ -14,6 +14,7 @@ export default function SearchField({ value, onChange, onSubmit, placeholder }) 
       </label>
       <input
         id="foodhunt-search"
+        name="q"
         type="search"
         className="search-input"
         value={value}

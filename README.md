@@ -1,8 +1,10 @@
 # FoodHunt
 
 PWA rekomendasi kuliner Tembalang, koleksi resto hidden gem, dan catatan resto yang
-pernah dibeli. Dibuat untuk Tugas Akhir Praktikum Pemrograman Perangkat Bergerak
-(PPB) 2026.
+pernah dibeli. Frontend React memanggil REST API Express buatan sendiri. API itulah
+yang membaca dan menulis data ke Supabase PostgreSQL.
+
+Dibuat untuk Tugas Akhir Praktikum Pemrograman Perangkat Bergerak (PPB) 2026.
 
 **Identitas**
 Nama: Rizkia Rahman
@@ -11,37 +13,40 @@ Program studi: Teknik Komputer, Universitas Diponegoro (Angkatan 2024)
 
 ---
 
-## Status backend
+## Arsitektur
 
-Project Supabase **FoodHunt** sudah dibuat di region `ap-southeast-1` (ref
-`fzahctmhlkeqlrcvpvws`). Tabel `places` dan `visits` sudah dibuat, policy RLS
-aktif, dan 10 rekomendasi awal sudah masuk. Kredensial lokal ada di `.env` (tidak
-di-commit). Untuk Vercel, isi environment variable yang sama.
+```
+Browser (React + Vite)
+   -> axios
+   -> REST API Express (/api/places, /api/visits)
+   -> Supabase JS
+   -> PostgreSQL Supabase
+```
+
+Frontend tidak memegang kredensial Supabase dan tidak memanggil `/rest/v1`.
+Backend Express ada di folder `server/`, mengikuti struktur Modul 1:
+`config`, `models`, `controllers`, `routes`.
 
 ---
 
 ## Fitur
 
-- **Beranda** (`/`): sapaan, pencarian, filter kategori, rekomendasi pilihan,
-  ringkasan Resto Saya, ringkasan Pernah Beli, dan review terakhir.
+- **Beranda** (`/`): rekomendasi pilihan, ringkasan Resto Saya, ringkasan Pernah
+  Beli, dan review terakhir.
 - **Rekomendasi** (`/foods`): 10 resto kurasi Tembalang. Resto pribadi ikut muncul
-  di sini kalau rata-rata reviewnya minimal 4.0. Ada pencarian, filter kategori,
-  filter Pilihan atau Hidden gem, dan urutan rating atau harga.
-- **Detail resto** (`/foods/[id]`): foto, kategori, rating, harga, deskripsi, jam
-  buka, patokan, menu andalan, dan review.
-- **Resto Saya** (`/resto`): tambah, edit, dan hapus resto hidden gem milik sendiri.
-  Resto pribadi bisa langsung dicatat pembeliannya dari halaman detail.
-- **Pernah Beli** (`/riwayat`): daftar resto yang pernah dibeli, lengkap dengan
-  rating enak, murah, lingkungan, menu yang dibeli, nominal, tanggal, dan catatan.
-  Satu resto punya satu review yang bisa diedit atau dihapus.
-- **Profil** (`/profile`): identitas pembuat, statistik rekomendasi, resto pribadi,
-  total pernah beli, rata-rata review, panduan pasang PWA, dan info aplikasi.
-- **PWA**: manifest, ikon 192/512, service worker Workbox, bisa dipasang di Android
-  maupun desktop.
-- **Offline**: rekomendasi, resto pribadi, dan review terakhir tetap terbaca dari
-  cache. Perubahan data memerlukan koneksi dan akan menampilkan pesan kalau gagal.
-- **Responsif**: HP memakai bottom navigation; mulai 960px tampil sidebar, grid dua
-  kolom, dan detail dua kolom.
+  kalau rata-rata reviewnya minimal 4.0. Ada pencarian, filter kategori, filter
+  Pilihan atau Hidden gem, dan urutan rating atau harga.
+- **Detail resto** (`/foods/[id]`): foto, rating, harga, deskripsi, jam buka,
+  patokan, menu andalan, dan review.
+- **Resto Saya** (`/resto`): tambah, edit, dan hapus resto hidden gem sendiri.
+- **Pernah Beli** (`/riwayat`): daftar resto yang pernah dibeli, dengan rating enak,
+  murah, lingkungan, menu, nominal, tanggal, dan catatan. Satu resto satu review.
+- **Profil** (`/profile`): identitas, statistik, rata-rata review, panduan PWA,
+  dan info aplikasi.
+- **PWA**: manifest, ikon 192/512, service worker, bisa dipasang di Android dan
+  desktop.
+- **Offline**: data terakhir dari API di-cache. Perubahan data memerlukan koneksi.
+- **Responsif**: bottom nav di HP, sidebar dan grid dua kolom mulai 960px.
 
 ---
 
@@ -49,17 +54,15 @@ di-commit). Untuk Vercel, isi environment variable yang sama.
 
 | Bagian | Teknologi |
 | --- | --- |
-| UI | React 19 |
-| Build tool | Vite 8 |
+| Frontend | React 19 + Vite 8 |
+| Backend | Node.js + Express 5 |
+| Database | Supabase PostgreSQL |
+| Akses database | `@supabase/supabase-js` di backend |
+| HTTP client frontend | axios |
 | PWA | vite-plugin-pwa (Workbox) |
-| Database dan API | Supabase (PostgreSQL + PostgREST) |
-| HTTP client | axios |
 | Ikon | lucide-react |
-| Routing | History API kecil di `src/lib/router.js` |
-| Styling | CSS murni dengan design token |
-| Hosting | Vercel |
-
-Skema database dan data rekomendasi ada di `supabase/schema.sql`.
+| Styling | CSS murni |
+| Hosting | Vercel (frontend dan API sebagai dua project) |
 
 ---
 
@@ -71,21 +74,21 @@ Skema database dan data rekomendasi ada di `supabase/schema.sql`.
 | --- | --- | --- |
 | `id` | text (PK) | `place-1` untuk seed, `place-<uuid>` untuk resto pribadi |
 | `name` | text | nama resto |
-| `area_name` | text | kawasan, mis. `Kawasan Jl. Gondong` |
+| `area_name` | text | kawasan |
 | `category` | text | Makan Berat, Burjo & Mie, Kopi & Nugas, Jajanan Malam |
 | `price_range` | text | teks kisaran harga |
-| `min_price` | integer | harga terendah untuk urutan harga |
+| `min_price` | integer | harga terendah |
 | `rating` | numeric(2,1) | rating kurasi, 0 untuk resto pribadi |
 | `open_hours` | text | jam buka |
 | `landmark` | text | patokan alamat |
 | `description` | text | catatan atau deskripsi |
 | `image_url` | text | foto |
-| `signature_menus` | jsonb | array `{name, price}` untuk resto kurasi |
+| `signature_menus` | jsonb | array `{name, price}` |
 | `source` | text | `curated` atau `personal` |
 | `created_at`, `updated_at` | timestamptz | waktu data |
 
-**visits**: catatan pernah beli dan review. Satu resto hanya boleh punya satu baris
-(`place_id` UNIQUE).
+**visits**: catatan pernah beli dan review. `place_id` UNIQUE, jadi satu resto satu
+review.
 
 | Kolom | Tipe | Keterangan |
 | --- | --- | --- |
@@ -94,9 +97,9 @@ Skema database dan data rekomendasi ada di `supabase/schema.sql`.
 | `item_name` | text | menu yang dibeli |
 | `amount` | integer | nominal belanja |
 | `purchased_at` | date | tanggal beli |
-| `taste` | smallint | rating enak, 1 sampai 5 |
-| `affordability` | smallint | rating murah, 1 sampai 5 |
-| `environment` | smallint | rating lingkungan, 1 sampai 5 |
+| `taste` | smallint | rating enak 1 sampai 5 |
+| `affordability` | smallint | rating murah 1 sampai 5 |
+| `environment` | smallint | rating lingkungan 1 sampai 5 |
 | `note` | text | catatan review |
 | `created_at`, `updated_at` | timestamptz | waktu data |
 
@@ -105,148 +108,175 @@ Nilai ambang ada di `src/lib/reviews.js` (`RECOMMENDATION_MIN_SCORE`).
 
 ---
 
-## Menyiapkan Supabase
+## Menyiapkan database
 
-1. Buat project baru di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, tempel isi `supabase/schema.sql`, lalu jalankan. File ini
-   membuat tabel, policy RLS, dan 10 rekomendasi awal.
-3. Buka **Project Settings > API**, salin **Project URL** dan **publishable key**
-   (atau anon key).
-4. Salin `.env.example` menjadi `.env`, lalu isi:
+1. Buat project Supabase.
+2. Buka **SQL Editor**, jalankan `supabase/schema.sql`.
+3. Salin **Project URL** dan **publishable key**. Nilai ini hanya dipakai backend.
 
-   ```env
-   VITE_API_BASE_URL=https://<project-ref>.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxx
-   ```
-
-Publishable key dipakai di sisi klien. Akses tulis dibuka lewat policy RLS publik,
-sama seperti pola praktikum modul 5. Untuk aplikasi produksi dengan akun pengguna,
-ganti policy tersebut dengan policy berbasis `auth.uid()`.
-
-Project Supabase free tier bisa di-pause setelah beberapa hari tanpa aktivitas.
-Buka dashboard Supabase sebelum demo supaya project aktif kembali.
+> **Perhatian**: `schema.sql` memulai dengan `DROP TABLE` untuk `places` dan
+> `visits`. Jangan jalankan ulang di project yang sudah berisi data penting.
 
 ---
 
 ## Menjalankan lokal
+
+Butuh dua terminal.
+
+**Terminal 1, backend API:**
+
+```bash
+cd server
+npm install
+copy .env.example .env
+npm run dev
+```
+
+Isi `server/.env`:
+
+```env
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_KEY=sb_publishable_xxxxxxxx
+PORT=3000
+CORS_ORIGIN=http://localhost:5173
+```
+
+Cek `http://localhost:3000/api/health`.
+
+**Terminal 2, frontend:**
 
 ```bash
 npm install
 npm run dev
 ```
 
-Buka `http://localhost:5173`.
+Buka `http://localhost:5173`. Vite mem-proxy `/api` ke `http://localhost:3000`, jadi
+frontend tetap memanggil `/api/places` tanpa CORS saat development.
 
-Build produksi:
+Frontend `.env` hanya berisi:
 
-```bash
-npm run build
-npm run preview
+```env
+VITE_API_BASE_URL=
 ```
 
----
-
-## Deploy ke Vercel
-
-1. Buat repository GitHub, lalu unggah folder ini.
-2. Di Vercel, pilih **Add New > Project**, import repository.
-3. Framework terdeteksi sebagai **Vite** (build `npm run build`, output `dist`).
-4. Tambahkan environment variable `VITE_API_BASE_URL` dan
-   `VITE_SUPABASE_PUBLISHABLE_KEY` di **Settings > Environment Variables**.
-5. Deploy. `vercel.json` mengarahkan rute SPA (`/foods/[id]`, `/resto`,
-   `/riwayat`, dan seterusnya) ke `index.html`.
+Kosongkan untuk development lokal. Isi saat production.
 
 ---
 
-## REST API
+## Endpoint API
 
-Aplikasi memakai PostgREST milik Supabase, dengan skema dan policy project ini.
-Pemetaan ke endpoint:
-
-| Method | Endpoint PRD | Endpoint yang dipanggil aplikasi |
+| Method | Endpoint | Keterangan |
 | --- | --- | --- |
-| GET | `/api/places` | `GET /rest/v1/places?select=*` |
-| GET | `/api/places/[id]` | `GET /rest/v1/places?select=*&id=eq.<id>` |
-| POST | `/api/places` | `POST /rest/v1/places` |
-| PATCH | `/api/places/[id]` | `PATCH /rest/v1/places?id=eq.<id>` |
-| DELETE | `/api/places/[id]` | `DELETE /rest/v1/places?id=eq.<id>` |
-| GET | `/api/visits` | `GET /rest/v1/visits?select=*` |
-| POST | `/api/visits` | `POST /rest/v1/visits` |
-| PATCH | `/api/visits/[id]` | `PATCH /rest/v1/visits?id=eq.<id>` |
-| DELETE | `/api/visits/[id]` | `DELETE /rest/v1/visits?id=eq.<id>` |
+| GET | `/api/health` | status server |
+| GET | `/api/places` | daftar resto, filter `source`, `category`, `q`, `sort` |
+| GET | `/api/places/:id` | detail resto |
+| POST | `/api/places` | tambah resto pribadi |
+| PUT | `/api/places/:id` | ubah resto pribadi |
+| DELETE | `/api/places/:id` | hapus resto pribadi |
+| GET | `/api/visits` | daftar pernah beli |
+| GET | `/api/visits/:id` | detail review |
+| POST | `/api/visits` | tambah review |
+| PUT | `/api/visits/:id` | ubah review |
+| DELETE | `/api/visits/:id` | hapus review |
 
-Contoh request:
+Detail body request, contoh Postman, dan error response ada di `server/README.md`.
 
-```bash
-curl "https://<project>.supabase.co/rest/v1/places?select=*&source=eq.curated" \
-  -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+Resto kurasi tidak bisa diubah atau dihapus lewat API. Operasi tulis hanya untuk
+`source = personal`.
 
-curl -X POST "https://<project>.supabase.co/rest/v1/visits" \
-  -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
-  -H "Content-Type: application/json" \
-  -H "Prefer: return=representation" \
-  -d '{"place_id":"place-1","item_name":"Geprek + es teh","amount":15000,"purchased_at":"2026-11-23","taste":5,"affordability":4,"environment":3,"note":"Sambalnya enak"}'
-```
+---
 
-`POST /visits` untuk resto yang sudah punya review akan ditolak oleh UNIQUE
-`place_id` (kode PostgreSQL `23505`). Aplikasi menampilkan pesan yang sesuai.
+## Deploy ke Vercel, dua project
+
+### 1. Backend API
+
+1. Push repository ke GitHub.
+2. Vercel **Add New > Project**, import repo.
+3. **Root Directory**: `server`.
+4. Framework preset: **Other**.
+5. Environment variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_KEY`
+   - `CORS_ORIGIN` (URL frontend, mis. `https://foodhunt.vercel.app`)
+6. Deploy. Cek `https://<api>.vercel.app/api/health`.
+
+`server/vercel.json` memakai `@vercel/node` untuk `src/index.js`.
+
+### 2. Frontend
+
+1. Vercel **Add New > Project**, import repo yang sama.
+2. Root Directory: root repository.
+3. Framework: **Vite**, build `npm run build`, output `dist`.
+4. Environment variable:
+   `VITE_API_BASE_URL=https://<api>.vercel.app/api`
+5. Deploy.
+
+`vercel.json` di root mengarahkan rute SPA ke `index.html`.
+
+Kalau URL frontend berubah, perbarui `CORS_ORIGIN` di backend lalu redeploy.
 
 ---
 
 ## Struktur proyek
 
 ```
+server/
+  src/
+    config/supabaseClient.js
+    models/placeModel.js
+    models/visitModel.js
+    controllers/placeController.js
+    controllers/visitController.js
+    routes/placeRoutes.js
+    routes/visitRoutes.js
+    index.js
+  .env.example
+  package.json
+  vercel.json
 src/
-  config/api.js           klien axios Supabase PostgREST
+  config/api.js           axios ke API Express
   services/               placeService, visitService
   context/                Places, Visits, Install, Toast, Update
   pages/                  Home, Foods, FoodDetail, Resto, Visits, Profile
-  components/             PlaceRow, PlaceTile, VisitCard, ReviewSummary,
-                          PlaceFormModal, ReviewFormModal, Modal, dll.
-  lib/                    router, format, reviews, errors, storage, platform
-  data/                   kategori, navigasi, identitas pembuat
+  components/             PlaceRow, VisitCard, ReviewSummary, form modal, dll.
+  lib/                    router, format, reviews, errors, storage
   index.css               design system
+supabase/schema.sql       DDL, policy, seed
 public/                   ikon PWA, robots.txt
-supabase/schema.sql       DDL, policy, dan 10 rekomendasi awal
-scripts/generate-icons.mjs   pembuat ikon PNG tanpa dependensi
 ```
 
 ---
 
 ## Keputusan desain
 
-- **Satu tempat, dua sumber**: rekomendasi kurasi dan resto pribadi disimpan di
-  tabel yang sama (`places.source`). Ini membuat detail, pencarian, dan review
-  bisa dipakai bersama tanpa menduplikasi komponen.
-- **Satu review per resto**: sesuai kebutuhan tugas, satu kunjungan dicatat sebagai
-  satu review yang bisa diedit. Ini mencegah daftar review menumpuk dan membuat
-  perbandingan enak, murah, lingkungan tetap jelas.
-- **Ambang 4.0**: resto pribadi baru masuk Rekomendasi kalau kualitasnya terbukti
-  lewat review, sehingga tab Rekomendasi tetap terasa terkurasi.
-- **Krem hangat, oranye bata, hijau status**: oranye untuk harga dan aksi utama,
-  hijau hanya untuk status pernah dibeli atau kualitas rekomendasi.
-- **Fraunces + Plus Jakarta Sans**: Fraunces memberi karakter papan menu warung,
-  Jakarta Sans menjaga teks kecil dan form tetap mudah dibaca.
-- **Sidebar desktop, bottom nav HP**: satu aplikasi responsif, tanpa memisahkan
-  basis kode desktop dan Android.
-- **Kartu border tipis**: hierarki dibentuk oleh jarak dan kontras, bukan bayangan
-  tebal. Bayangan hanya untuk elemen yang mengambang di atas konten.
+- **Frontend dan backend dipisah**: frontend tidak pernah memegang kredensial
+  Supabase. Semua akses data lewat Express.
+- **Satu tempat, dua sumber**: rekomendasi kurasi dan resto pribadi memakai tabel
+  `places` dengan kolom `source`.
+- **Satu review per resto**: memudahkan perbandingan enak, murah, lingkungan.
+- **Ambang 4.0**: resto pribadi masuk Rekomendasi hanya kalau kualitasnya terbukti
+  lewat review.
+- **Krem hangat dan oranye bata**: oranye untuk harga dan aksi utama, hijau untuk
+  status pernah dibeli.
+- **Fraunces + Plus Jakarta Sans**: karakter papan menu warung, teks form tetap
+  mudah dibaca.
+- **Sidebar desktop, bottom nav HP**: satu basis kode responsif.
 
 ---
 
 ## Checklist kriteria selesai
 
-- [x] Operasi CRUD `places` dan `visits` tersedia lewat PostgREST dan dipakai aplikasi.
+- [x] Frontend memanggil REST API Express buatan sendiri.
+- [x] Backend Express memakai struktur config, models, controllers, routes.
+- [x] Backend membaca dan menulis ke PostgreSQL Supabase.
+- [x] Endpoint CRUD `places` dan `visits` berjalan.
 - [x] Bottom navigation berfungsi di 5 halaman utama.
-- [x] Tab Rekomendasi menampilkan 10 resto kurasi dan hidden gem dengan rata-rata
-      review minimal 4.0.
-- [x] Klik kartu rekomendasi membuka `/foods/[id]`.
+- [x] Tab Rekomendasi menampilkan resto kurasi dan hidden gem minimal 4.0.
 - [x] Tab Resto Saya bisa menambah, mengedit, dan menghapus resto pribadi.
-- [x] Tab Pernah Beli bisa mencatat, mengedit, dan menghapus review dengan rating
-      enak, murah, lingkungan.
-- [x] Halaman Profil menampilkan identitas, statistik, dan ringkasan review.
+- [x] Tab Pernah Beli bisa mencatat, mengedit, dan menghapus review.
+- [x] Halaman Profil menampilkan identitas dan statistik.
 - [x] Manifest, ikon 192/512, dan service worker aktif.
-- [ ] Deploy Vercel (isi kredensial Supabase lalu deploy; lihat langkah di atas).
+- [ ] Deploy Vercel dua project (backend dan frontend).
 
-Catatan: data kuliner awal adalah data contoh untuk keperluan praktikum, bukan
-hasil survei lapangan. Foto contoh diambil dari Unsplash.
+Catatan: data kuliner awal adalah data contoh untuk praktikum, bukan hasil survei
+lapangan. Foto contoh diambil dari Unsplash.

@@ -1,11 +1,13 @@
 {
   "name": "foodhunt",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
-  "description": "FoodHunt: PWA kurasi kuliner lokal Tembalang dan manajemen Hunt List.",
+  "description": "FoodHunt: PWA rekomendasi kuliner Tembalang, hidden gem, dan review resto.",
   "scripts": {
     "dev": "vite",
+    "dev:api": "npm --prefix server run dev",
+    "start:api": "npm --prefix server start",
     "build": "vite build",
     "preview": "vite preview",
     "icons": "node scripts/generate-icons.mjs"

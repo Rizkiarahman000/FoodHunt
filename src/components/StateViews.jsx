@@ -23,7 +23,6 @@ export function ErrorState({
   title = 'Data belum bisa dimuat',
   message,
   onRetry,
-  config = false,
 }) {
   return (
     <div className="state-box state-box--error">
@@ -32,19 +31,6 @@ export function ErrorState({
       </span>
       <h2>{title}</h2>
       <p>{message}</p>
-      {config && (
-        <ol className="setup-steps">
-          <li>Buat project di Supabase, lalu buka SQL Editor.</li>
-          <li>
-            Jalankan <code>supabase/schema.sql</code> sampai selesai.
-          </li>
-          <li>
-            Isi <code>VITE_API_BASE_URL</code> dan{' '}
-            <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> di <code>.env</code>, lalu muat
-            ulang halaman.
-          </li>
-        </ol>
-      )}
       {onRetry && (
         <button type="button" className="btn btn--primary" onClick={onRetry}>
           <RefreshCw size={16} aria-hidden="true" />
