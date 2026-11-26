@@ -4,11 +4,15 @@ import Modal from './Modal'
 import RatingInput from './RatingInput'
 import { useVisits } from '../context/VisitsContext'
 import useOnline from '../hooks/useOnline'
+import { isNetworkError } from '../config/api'
 import { mutationMessage } from '../lib/errors'
 import { SCORE_FIELDS, todayISO } from '../lib/reviews'
 
 const OFFLINE_MESSAGE =
   'Kamu sedang offline. Sambungkan internet dulu supaya review bisa disimpan.'
+
+const NETWORK_MESSAGE =
+  'Review belum tersimpan. Sambungkan internet atau pastikan API FoodHunt berjalan, lalu coba lagi.'
 
 const EMPTY_FORM = {
   placeId: '',
@@ -111,7 +115,11 @@ export default function ReviewFormModal({
       onSaved?.(visit)
       onClose()
     } catch (err) {
-      setError(mutationMessage(err, 'Review gagal disimpan. Coba lagi.'))
+      setError(
+        isNetworkError(err)
+          ? NETWORK_MESSAGE
+          : mutationMessage(err, 'Review gagal disimpan. Coba lagi.'),
+      )
     } finally {
       setSaving(false)
     }
@@ -242,7 +250,7 @@ export default function ReviewFormModal({
             <button type="button" className="btn btn--ghost" onClick={onClose} disabled={saving}>
               Batal
             </button>
-            <button type="submit" className="btn btn--primary" disabled={saving}>
+            <button type="submit" className="btn btn--primary" disabled={saving || !online}>
               {saving && <Loader size={16} className="spin" aria-hidden="true" />}
               {initialVisit ? 'Simpan review' : 'Simpan catatan'}
             </button>
