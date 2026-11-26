@@ -8,7 +8,7 @@ export default function OfflineBanner() {
   return (
     <div className="offline-banner" role="status">
       <WifiOff size={15} aria-hidden="true" />
-      <span>Mode offline. Data terakhir tetap bisa dibaca, perubahan dikirim nanti.</span>
+      <span>Mode offline. Data terakhir tetap bisa dibaca. Sambungkan internet dulu untuk menyimpan perubahan.</span>
     </div>
   )
 }

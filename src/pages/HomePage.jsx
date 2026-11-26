@@ -5,7 +5,6 @@ import {
   Plus,
   Store,
   UtensilsCrossed,
-  Wifi,
 } from 'lucide-react'
 import CategoryPills from '../components/CategoryPills'
 import FoodImage from '../components/FoodImage'
@@ -25,7 +24,7 @@ import { SCORE_FIELDS, formatDate, visitAverage } from '../lib/reviews'
 export default function HomePage() {
   const { curatedPlaces, personalPlaces, getPlace, loading, error, refresh } = usePlaces()
   const { visits, getVisit, stats } = useVisits()
-  const { installed, canInstall, promptInstall } = useInstall()
+  const { installed, promptInstall, installGuide } = useInstall()
   const notify = useToast()
   const [query, setQuery] = useState('')
 
@@ -50,9 +49,7 @@ export default function HomePage() {
   const handleInstall = async () => {
     const result = await promptInstall()
     if (result === 'accepted') notify('FoodHunt dipasang di layar utama.')
-    if (result === 'unavailable') {
-      notify('Buka menu browser lalu pilih "Instal aplikasi".', 'error')
-    }
+    if (result === 'unavailable') notify(installGuide, 'error')
   }
 
   return (
@@ -74,16 +71,11 @@ export default function HomePage() {
               <CheckCircle2 size={14} aria-hidden="true" />
               Terpasang
             </span>
-          ) : canInstall ? (
+          ) : (
             <button type="button" className="status-chip is-action" onClick={handleInstall}>
               <Download size={14} aria-hidden="true" />
               Pasang
             </button>
-          ) : (
-            <span className="status-chip">
-              <Wifi size={14} aria-hidden="true" />
-              PWA
-            </span>
           )}
         </div>
 

@@ -3494,6 +3494,16 @@ body:has(dialog[open]) .update-banner {
   color: var(--danger);
 }
 
+.form-error.is-offline {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.form-error.is-offline svg {
+  flex: none;
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

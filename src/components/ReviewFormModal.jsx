@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Loader } from 'lucide-react'
+import { Loader, WifiOff } from 'lucide-react'
 import Modal from './Modal'
 import RatingInput from './RatingInput'
 import { useVisits } from '../context/VisitsContext'
+import useOnline from '../hooks/useOnline'
 import { mutationMessage } from '../lib/errors'
 import { SCORE_FIELDS, todayISO } from '../lib/reviews'
+
+const OFFLINE_MESSAGE =
+  'Kamu sedang offline. Sambungkan internet dulu supaya review bisa disimpan.'
 
 const EMPTY_FORM = {
   placeId: '',
@@ -26,6 +30,7 @@ export default function ReviewFormModal({
   onSaved,
 }) {
   const { saveVisit } = useVisits()
+  const online = useOnline()
   const [form, setForm] = useState(EMPTY_FORM)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -72,6 +77,10 @@ export default function ReviewFormModal({
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (!online) {
+      setError(OFFLINE_MESSAGE)
+      return
+    }
     if (!form.placeId) {
       setError('Pilih resto yang pernah kamu beli.')
       return
@@ -216,10 +225,17 @@ export default function ReviewFormModal({
             </label>
           </div>
 
-          {error && (
-            <p className="form-error" role="alert">
-              {error}
+          {!online ? (
+            <p className="form-error is-offline" role="alert">
+              <WifiOff size={15} aria-hidden="true" />
+              {OFFLINE_MESSAGE}
             </p>
+          ) : (
+            error && (
+              <p className="form-error" role="alert">
+                {error}
+              </p>
+            )
           )}
 
           <div className="form-actions">

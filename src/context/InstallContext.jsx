@@ -43,6 +43,14 @@ export function InstallProvider({ children }) {
     return 'dismissed'
   }, [promptEvent])
 
+  const installGuide = useMemo(
+    () =>
+      ios
+        ? 'Di iPhone/iPad: buka Safari, ketuk tombol Bagikan, lalu pilih Tambahkan ke Layar Utama.'
+        : 'Buka menu browser (ikon titik tiga) lalu pilih "Instal aplikasi".',
+    [ios],
+  )
+
   const value = useMemo(
     () => ({
       canInstall: Boolean(promptEvent) && !installed,
@@ -50,8 +58,9 @@ export function InstallProvider({ children }) {
       isIOS: ios,
       standalone: isStandalone(),
       promptInstall,
+      installGuide,
     }),
-    [promptEvent, installed, ios, promptInstall],
+    [promptEvent, installed, ios, promptInstall, installGuide],
   )
 
   return <InstallCtx.Provider value={value}>{children}</InstallCtx.Provider>

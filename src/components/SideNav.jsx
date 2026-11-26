@@ -9,13 +9,13 @@ import { SCORE_FIELDS } from '../lib/reviews'
 
 export default function SideNav({ path }) {
   const { stats } = useVisits()
-  const { installed, canInstall, promptInstall } = useInstall()
+  const { installed, promptInstall, installGuide } = useInstall()
   const notify = useToast()
 
   const handleInstall = async () => {
     const result = await promptInstall()
     if (result === 'accepted') notify('FoodHunt dipasang di perangkat ini.')
-    if (result === 'unavailable') notify('Buka menu browser untuk memasang aplikasi.', 'error')
+    if (result === 'unavailable') notify(installGuide, 'error')
   }
 
   return (
@@ -77,16 +77,11 @@ export default function SideNav({ path }) {
             <CheckCircle2 size={15} aria-hidden="true" />
             Terpasang di perangkat
           </p>
-        ) : canInstall ? (
+        ) : (
           <button type="button" className="side-install" onClick={handleInstall}>
             <Download size={16} aria-hidden="true" />
             Pasang FoodHunt
           </button>
-        ) : (
-          <p className="side-installed">
-            <Download size={15} aria-hidden="true" />
-            Bisa dipasang dari browser
-          </p>
         )}
       </div>
     </aside>

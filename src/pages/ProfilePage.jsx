@@ -30,7 +30,7 @@ export default function ProfilePage() {
   const { stats, error: visitsError } = useVisits()
   const online = useOnline()
   const notify = useToast()
-  const { installed, canInstall, isIOS, standalone, promptInstall } = useInstall()
+  const { installed, isIOS, standalone, promptInstall, installGuide } = useInstall()
   const { needRefresh, updateServiceWorker, checkForUpdate, offlineReady } = useUpdate()
   const [checking, setChecking] = useState(false)
 
@@ -40,9 +40,7 @@ export default function ProfilePage() {
   const handleInstall = async () => {
     const result = await promptInstall()
     if (result === 'accepted') notify('FoodHunt dipasang di layar utama.')
-    if (result === 'unavailable') {
-      notify('Buka menu browser lalu pilih "Instal aplikasi".', 'error')
-    }
+    if (result === 'unavailable') notify(installGuide, 'error')
   }
 
   const handleUpdate = async () => {
@@ -189,28 +187,23 @@ export default function ProfilePage() {
               <CheckCircle2 size={15} aria-hidden="true" />
               FoodHunt sudah terpasang dan bisa dibuka tanpa browser.
             </p>
-          ) : canInstall ? (
+          ) : (
             <>
               <p className="panel-note">
                 Pasang supaya FoodHunt bisa dibuka langsung dari layar utama, termasuk saat
                 offline.
               </p>
+              {isIOS && !standalone && (
+                <p className="panel-note">
+                  <Share2 size={15} aria-hidden="true" />
+                  {installGuide}
+                </p>
+              )}
               <button type="button" className="btn btn--primary btn--sm" onClick={handleInstall}>
                 <Download size={15} aria-hidden="true" />
                 Pasang FoodHunt
               </button>
             </>
-          ) : isIOS && !standalone ? (
-            <p className="panel-note">
-              <Share2 size={15} aria-hidden="true" />
-              Di iPhone atau iPad: buka lewat Safari, ketuk tombol Bagikan, lalu pilih
-              Tambahkan ke Layar Utama.
-            </p>
-          ) : (
-            <p className="panel-note">
-              Buka menu browser (ikon titik tiga) atau ikon instal di bilah alamat, lalu pilih
-              Instal aplikasi.
-            </p>
           )}
         </div>
 
