@@ -29,6 +29,17 @@ Backend Express ada di folder `server/`, mengikuti struktur Modul 1:
 
 ---
 
+## Deployment production
+
+- Frontend: https://foodhunt-puce.vercel.app
+- API Express: https://foodhunt-api.vercel.app
+- Health check: https://foodhunt-api.vercel.app/api/health
+
+Frontend production memanggil `https://foodhunt-api.vercel.app/api`. CORS backend
+dibatasi ke domain frontend tersebut.
+
+---
+
 ## Fitur
 
 - **Beranda** (`/`): rekomendasi pilihan, ringkasan Resto Saya, ringkasan Pernah
@@ -276,7 +287,8 @@ public/                   ikon PWA, robots.txt
 - [x] Tab Pernah Beli bisa mencatat, mengedit, dan menghapus review.
 - [x] Halaman Profil menampilkan identitas dan statistik.
 - [x] Manifest, ikon 192/512, dan service worker aktif.
-- [ ] Deploy Vercel dua project (backend dan frontend).
+- [x] Deploy Vercel dua project (frontend dan API).
+- [x] Frontend production memanggil API Express, bukan Supabase langsung.
 
 Catatan: data kuliner awal adalah data contoh untuk praktikum, bukan hasil survei
 lapangan. Foto contoh diambil dari Unsplash.
